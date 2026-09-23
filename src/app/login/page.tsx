@@ -28,7 +28,8 @@ export default function LoginPage() {
         router.push("/");
       }, 500);
     } catch (error: any) {
-      setError("Invalid credentials. Please check your email and password.");
+      console.error(error);
+      setError(`Login failed: ${error.message || "Invalid credentials"}`);
     } finally {
       setLoading(false);
     }

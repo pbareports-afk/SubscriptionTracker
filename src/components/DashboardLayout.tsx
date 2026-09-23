@@ -1,15 +1,17 @@
 "use client";
 
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, Suspense } from "react";
 import { LayoutDashboard, Globe, Server, Smartphone, MonitorDot, LogOut, Settings, BarChart3 } from "lucide-react";
 import { Button } from "./ui/button";
 import Swal from 'sweetalert2';
 
-export function DashboardLayout({ children }: { children: React.ReactNode }) {
+function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentCategory = searchParams.get("category") || "All Services";
 
   useEffect(() => {
     if (!loading && !user) {
@@ -26,12 +28,12 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   }
 
   const menuItems = [
-    { icon: LayoutDashboard, label: "All Services", active: true },
-    { icon: Globe, label: "Domains", active: false },
-    { icon: Server, label: "Hosting / Cloud", active: false },
-    { icon: Smartphone, label: "SIM & Network", active: false },
-    { icon: MonitorDot, label: "Software / Subs", active: false },
-  ];
+    { icon: LayoutDashboard, label: "All Services", mappedCategory: "All Services" },
+    { icon: Globe, label: "Domains", mappedCategory: "Domain" },
+    { icon: Server, label: "Hosting / Cloud", mappedCategory: "Hosting" },
+    { icon: Smartphone, label: "SIM & Network", mappedCategory: "SIM" },
+    { icon: MonitorDot, label: "Software / Subs", mappedCategory: "Software" },
+  ].map(item => ({...item, active: item.mappedCategory === currentCategory || item.label === currentCategory}));
 
   const handleSignOut = () => {
     Swal.fire({
@@ -76,11 +78,11 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
           </div>
           
           <nav className="flex-1 px-4 space-y-2 mt-4">
-            <p className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Menu</p>
+            <p className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Categories</p>
             {menuItems.map((item, idx) => (
               <a
                 key={idx}
-                href="#"
+                href={item.label === "All Services" ? "/" : `/?category=${encodeURIComponent(item.label)}`}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   item.active 
                     ? "bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-400 border border-blue-500/30 shadow-[inset_0_0_15px_rgba(59,130,246,0.2)]" 
@@ -93,7 +95,7 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
             ))}
           </nav>
 
-          <div className="p-4">
+          <div className="p-4 mt-auto">
             <div className="glass rounded-2xl p-4 flex flex-col gap-3">
               <div className="flex items-center gap-3 text-sm">
                 <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
@@ -104,14 +106,25 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
                   <p className="text-xs text-blue-300">Administrator</p>
                 </div>
               </div>
-              <Button 
-                variant="ghost" 
-                className="w-full bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 justify-center rounded-xl transition-colors border border-white/5" 
-                onClick={handleSignOut}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sign Out
-              </Button>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white justify-center rounded-xl transition-colors border border-white/5" 
+                  onClick={() => router.push('/settings')}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Settings
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  className="flex-1 bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 justify-center rounded-xl transition-colors border border-white/5" 
+                  onClick={handleSignOut}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </Button>
+              </div>
             </div>
           </div>
         </aside>
@@ -124,5 +137,13 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
         </main>
       </div>
     </div>
+  );
+}
+
+export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center bg-[#0d0f1c]"><div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div></div>}>
+      <DashboardLayoutContent>{children}</DashboardLayoutContent>
+    </Suspense>
   );
 }

@@ -9,13 +9,18 @@ import { getSubscriptions, getCompanies, deleteSubscription, addSubscription, up
 import { ServiceModal } from "@/components/ServiceModal";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
-export default function Home() {
+export default function Home({ searchParams }: { searchParams: { category?: string } }) {
   const [services, setServices] = useState<Subscription[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Subscription | null>(null);
+
+  const currentCategory = searchParams.category;
+  const filteredServices = currentCategory 
+    ? services.filter(s => s.category === currentCategory || currentCategory === 'All Services')
+    : services;
 
   useEffect(() => {
     fetchData();
@@ -152,7 +157,7 @@ export default function Home() {
           <div className="flex justify-center items-center py-20">
              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
           </div>
-        ) : services.length === 0 ? (
+        ) : filteredServices.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 text-center glass rounded-3xl border-white/10">
              <Clock className="h-16 w-16 text-white/20 mb-4" />
              <h3 className="text-2xl font-semibold text-white mb-2">No Services Yet</h3>
@@ -160,7 +165,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {services.map((service) => {
+            {filteredServices.map((service) => {
               const daysLeft = differenceInDays(service.expiryDate, new Date());
               const colorClass = getStatusColor(daysLeft);
               const isDanger = daysLeft <= 30;
