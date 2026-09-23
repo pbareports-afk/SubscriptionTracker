@@ -82,7 +82,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
             {menuItems.map((item, idx) => (
               <a
                 key={idx}
-                href={item.label === "All Services" ? "/" : `/?category=${encodeURIComponent(item.label)}`}
+                href={item.label === "All Services" ? "/" : `/?category=${encodeURIComponent(item.mappedCategory)}`}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   item.active 
                     ? "bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-400 border border-blue-500/30 shadow-[inset_0_0_15px_rgba(59,130,246,0.2)]" 
