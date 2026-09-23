@@ -171,6 +171,7 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
               ) : (
                 <div className="flex gap-2">
                   <Select 
+                    key={companies.length}
                     value={formData.companyId} 
                     onValueChange={(v) => setFormData({...formData, companyId: v || ''})}
                   >
