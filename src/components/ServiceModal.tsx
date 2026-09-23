@@ -175,7 +175,9 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
                     onValueChange={(v) => setFormData({...formData, companyId: v || ''})}
                   >
                     <SelectTrigger className="glass-input flex-1">
-                      <SelectValue placeholder="Select company" />
+                      <SelectValue placeholder="Select company">
+                        {companies.find(c => c.id === formData.companyId)?.name || "Select company"}
+                      </SelectValue>
                     </SelectTrigger>
                     <SelectContent className="bg-slate-800 text-white border-white/10">
                       {companies.map(c => (
