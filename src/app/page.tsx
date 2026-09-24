@@ -121,7 +121,7 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
   };
 
   return (
-    <>
+    <DashboardLayout>
       {/* Header & Search */}
       <div className="mb-10">
         <h1 className="text-3xl font-bold text-slate-800 mb-6 tracking-tight">Your subscriptions</h1>
@@ -244,6 +244,6 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
         companies={companies}
         onCompanyAdded={(c) => setCompanies([...companies, c])}
       />
-    </>
+    </DashboardLayout>
   );
 }
