@@ -105,6 +105,28 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
     });
   };
 
+  const handleMarkAsRenewed = async (service: Subscription) => {
+    const { value: dateStr } = await Swal.fire({
+      title: 'Update Expiry Date',
+      text: 'Select the new expiration date after renewal:',
+      input: 'date',
+      inputValue: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+      showCancelButton: true,
+      confirmButtonColor: '#2563eb',
+    });
+
+    if (dateStr) {
+      try {
+        await updateSubscription(service.id!, { expiryDate: new Date(dateStr) });
+        await fetchData();
+        window.dispatchEvent(new CustomEvent('refresh-data'));
+        Swal.fire({ icon: 'success', title: 'Updated!', showConfirmButton: false, timer: 1500 });
+      } catch (error: any) {
+        Swal.fire('Error', error.message, 'error');
+      }
+    }
+  };
+
   const handleSaveService = async (serviceData: Subscription) => {
     if (editingService?.id) {
       await updateSubscription(editingService.id, serviceData);
@@ -321,12 +343,22 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
                               >
                                 Renew &gt;
                               </button>
-                            ) : service.renewMethod === 'Email' ? (
-                              <span className="text-slate-500 font-semibold text-[11px] uppercase tracking-wider mr-2 bg-slate-100 px-2 py-1 rounded-md">Via Email</span>
-                            ) : service.renewMethod === 'LINE' ? (
-                              <span className="text-[#00B900] font-semibold text-[11px] uppercase tracking-wider mr-2 bg-[#00B900]/10 px-2 py-1 rounded-md">Via LINE</span>
                             ) : (
-                              <span className="text-slate-500 font-semibold text-[11px] uppercase tracking-wider mr-2 bg-slate-100 px-2 py-1 rounded-md">{service.renewMethod}</span>
+                              <div className="flex items-center mr-2 gap-2">
+                                {service.renewMethod === 'Email' ? (
+                                  <span className="text-slate-500 font-semibold text-[11px] uppercase tracking-wider bg-slate-100 px-2 py-1 rounded-md">Via Email</span>
+                                ) : service.renewMethod === 'LINE' ? (
+                                  <span className="text-[#00B900] font-semibold text-[11px] uppercase tracking-wider bg-[#00B900]/10 px-2 py-1 rounded-md">Via LINE</span>
+                                ) : (
+                                  <span className="text-slate-500 font-semibold text-[11px] uppercase tracking-wider bg-slate-100 px-2 py-1 rounded-md">{service.renewMethod}</span>
+                                )}
+                                <button 
+                                  onClick={() => handleMarkAsRenewed(service)}
+                                  className="text-blue-600 font-bold text-xs hover:text-blue-700 transition-colors border border-blue-200 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-md"
+                                >
+                                  Update Date
+                                </button>
+                              </div>
                             )}
                             
                             <DropdownMenu>
