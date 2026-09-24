@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Plus, MoreHorizontal, Search, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
+import { Plus, MoreHorizontal, Search, CheckCircle2, AlertCircle, XCircle, Edit, Trash2 } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 import Swal from 'sweetalert2';
 import { getSubscriptions, getCompanies, deleteSubscription, addSubscription, updateSubscription, Subscription, Company } from "@/lib/db";
@@ -178,7 +178,7 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
                           <td className="px-8 py-5">
                             <div className="flex items-center gap-4">
                               <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg shrink-0">
-                                {service.title.charAt(0).toUpperCase()}
+                                {(service.title || '?').charAt(0).toUpperCase()}
                               </div>
                               <div>
                                 <p className="font-bold text-slate-800 text-base">{service.title}</p>
