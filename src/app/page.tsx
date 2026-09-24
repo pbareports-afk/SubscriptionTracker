@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Plus, ExternalLink, MoreVertical, ShieldAlert, CheckCircle2, Clock, Edit, Trash2, Building2 } from "lucide-react";
+import { Plus, MoreHorizontal, Search, CheckCircle2, AlertCircle, XCircle } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 import Swal from 'sweetalert2';
 import { getSubscriptions, getCompanies, deleteSubscription, addSubscription, updateSubscription, Subscription, Company } from "@/lib/db";
@@ -13,17 +13,34 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
   const [services, setServices] = useState<Subscription[]>([]);
   const [companies, setCompanies] = useState<Company[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingService, setEditingService] = useState<Subscription | null>(null);
 
   const currentCategory = searchParams.category;
-  const filteredServices = currentCategory 
+  let filteredServices = currentCategory 
     ? services.filter(s => s.category === currentCategory || currentCategory === 'All Services')
     : services;
 
+  if (searchQuery.trim()) {
+    const q = searchQuery.toLowerCase();
+    filteredServices = filteredServices.filter(s => 
+      s.title.toLowerCase().includes(q) || 
+      (s.provider && s.provider.toLowerCase().includes(q))
+    );
+  }
+
   useEffect(() => {
     fetchData();
+    
+    // Listen for custom event from sidebar
+    const handleOpenModal = () => {
+      setEditingService(null);
+      setIsModalOpen(true);
+    };
+    window.addEventListener('open-add-modal', handleOpenModal);
+    return () => window.removeEventListener('open-add-modal', handleOpenModal);
   }, []);
 
   const fetchData = async () => {
@@ -39,40 +56,13 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
     }
   };
 
-  const getCompanyName = (id: string) => {
-    return companies.find(c => c.id === id)?.name || "Unknown Company";
-  };
-
-  const getStatusColor = (days: number) => {
-    if (days <= 30) return "bg-red-500 shadow-red-500/20";
-    if (days <= 60) return "bg-amber-500 shadow-amber-500/20";
-    return "bg-emerald-500 shadow-emerald-500/20";
-  };
-
-  const getStatusIcon = (days: number) => {
-    if (days <= 30) return <ShieldAlert className="h-5 w-5 text-red-500" />;
-    if (days <= 60) return <Clock className="h-5 w-5 text-amber-500" />;
-    return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
-  }
-
-  const getStatusText = (days: number) => {
-    if (days < 0) return "Expired";
-    if (days === 0) return "Expires Today";
-    return `${days} days left`;
-  };
-
-  const getProgressValue = (days: number) => {
-    const percentage = (days / 365) * 100;
-    return Math.min(Math.max(percentage, 5), 100); 
-  };
-
   const handleRenew = (service: Subscription) => {
     if (!service.renewUrl || service.renewUrl === '#') {
       Swal.fire({
         title: 'No Renewal Link',
         text: 'You have not set a renewal link for this service. Please edit the service to add one.',
         icon: 'warning',
-        confirmButtonColor: '#2563eb',
+        confirmButtonColor: '#4f46e5',
       });
       return;
     }
@@ -82,23 +72,18 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
   const handleDelete = (service: Subscription) => {
     Swal.fire({
       title: 'Delete Service?',
-      text: `Are you sure you want to delete ${service.title}? This cannot be undone.`,
+      text: `Are you sure you want to delete ${service.title}?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#64748b',
-      confirmButtonText: 'Yes, delete it!'
+      cancelButtonColor: '#94a3b8',
+      confirmButtonText: 'Delete'
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await deleteSubscription(service.id!);
           setServices(services.filter(s => s.id !== service.id));
-          Swal.fire({
-            icon: 'success',
-            title: 'Deleted!',
-            showConfirmButton: false,
-            timer: 1500
-          });
+          Swal.fire({ icon: 'success', title: 'Deleted!', showConfirmButton: false, timer: 1500 });
         } catch (error: any) {
           Swal.fire('Error', error.message, 'error');
         }
@@ -115,13 +100,12 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
     await fetchData();
   };
 
-  // Group services by company
   const groupedServices = companies.map(company => ({
     company,
-    services: filteredServices.filter(s => s.companyId === company.id)
+    services: filteredServices.filter(s => s.companyId === company.id).sort((a, b) => a.expiryDate.getTime() - b.expiryDate.getTime())
   })).filter(group => group.services.length > 0);
 
-  const unknownCompanyServices = filteredServices.filter(s => !companies.find(c => c.id === s.companyId));
+  const unknownCompanyServices = filteredServices.filter(s => !companies.find(c => c.id === s.companyId)).sort((a, b) => a.expiryDate.getTime() - b.expiryDate.getTime());
   if (unknownCompanyServices.length > 0) {
     groupedServices.push({
       company: { id: "unknown", name: "Other Services" },
@@ -129,121 +113,128 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
     });
   }
 
+  const getStatusDisplay = (days: number) => {
+    if (days < 0) return { icon: <XCircle className="h-4 w-4" />, text: "Expired", color: "text-red-500", bg: "bg-red-50" };
+    if (days <= 30) return { icon: <AlertCircle className="h-4 w-4" />, text: `${days} days left`, color: "text-red-500", bg: "bg-red-50" };
+    if (days <= 60) return { icon: <AlertCircle className="h-4 w-4" />, text: `${days} days left`, color: "text-amber-500", bg: "bg-amber-50" };
+    return { icon: <CheckCircle2 className="h-4 w-4" />, text: "Active", color: "text-emerald-500", bg: "bg-emerald-50" };
+  };
+
   return (
-    <DashboardLayout>
-      <div className="p-2 md:p-6 max-w-7xl mx-auto">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">Overview</h1>
-            <p className="text-slate-500">Track and manage your upcoming expirations.</p>
+    <>
+      {/* Header & Search */}
+      <div className="mb-10">
+        <h1 className="text-3xl font-bold text-slate-800 mb-6 tracking-tight">Your subscriptions</h1>
+        
+        <div className="relative max-w-2xl">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="h-5 w-5 text-slate-400" />
           </div>
-          <button 
-            onClick={() => { setEditingService(null); setIsModalOpen(true); }}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md rounded-xl px-5 py-2.5 font-medium transition-transform hover:scale-105 active:scale-95"
-          >
-            <Plus className="h-5 w-5" /> Add Service
-          </button>
+          <input 
+            type="text" 
+            placeholder="Search services, providers..." 
+            className="block w-full pl-11 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent shadow-sm"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
+      </div>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
-          </div>
-        ) : filteredServices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-slate-200 shadow-sm">
-             <Clock className="h-16 w-16 text-slate-300 mb-4" />
-             <h3 className="text-2xl font-semibold text-slate-900 mb-2">No Services Found</h3>
-             <p className="text-slate-500 mb-6">Click the button above to add a new subscription.</p>
-          </div>
-        ) : (
-          <div className="space-y-10">
-            {groupedServices.map(group => (
-              <div key={group.company.id} className="space-y-4">
-                <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
-                  <Building2 className="h-5 w-5 text-blue-600" />
-                  <h2 className="text-xl font-bold text-slate-800">{group.company.name}</h2>
-                  <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2 py-0.5 rounded-full">{group.services.length}</span>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                  {group.services.map((service) => {
-                    const daysLeft = differenceInDays(service.expiryDate, new Date());
-                    const colorClass = getStatusColor(daysLeft);
-                    const isDanger = daysLeft <= 30;
+      {loading ? (
+        <div className="flex justify-center items-center py-20">
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-600"></div>
+        </div>
+      ) : filteredServices.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-slate-100 shadow-sm">
+            <p className="text-slate-500 text-lg">No services found.</p>
+        </div>
+      ) : (
+        <div className="space-y-10 pb-20">
+          {groupedServices.map(group => (
+            <div key={group.company.id} className="bg-white rounded-3xl border border-slate-100 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] overflow-hidden">
+              
+              <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50">
+                <h2 className="text-xs font-bold text-slate-400 uppercase tracking-widest">{group.company.name}</h2>
+              </div>
+              
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left whitespace-nowrap">
+                  <thead className="text-xs text-slate-400 uppercase bg-white border-b border-slate-100">
+                    <tr>
+                      <th scope="col" className="px-8 py-4 font-semibold w-1/3">Service</th>
+                      <th scope="col" className="px-8 py-4 font-semibold">Status</th>
+                      <th scope="col" className="px-8 py-4 font-semibold">Category</th>
+                      <th scope="col" className="px-8 py-4 font-semibold">Payment Due</th>
+                      <th scope="col" className="px-8 py-4 font-semibold text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {group.services.map((service) => {
+                      const daysLeft = differenceInDays(service.expiryDate, new Date());
+                      const status = getStatusDisplay(daysLeft);
 
-                    return (
-                      <div 
-                        key={service.id} 
-                        className={`flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border transition-all hover:shadow-md ${isDanger ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200'}`}
-                      >
-                        <div className="p-5 flex-1">
-                          <div className="flex justify-between items-start mb-4">
-                            <span className="px-3 py-1 bg-slate-100 rounded-full text-xs font-semibold text-slate-600 border border-slate-200">
-                              {service.category}
-                            </span>
-                            
-                            <DropdownMenu>
-                              <DropdownMenuTrigger className="text-slate-400 hover:text-slate-600 transition-colors outline-none cursor-pointer">
-                                <MoreVertical className="h-5 w-5" />
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-40 bg-white text-slate-800 border-slate-200">
-                                <DropdownMenuItem className="focus:bg-slate-100 cursor-pointer" onClick={() => { setEditingService(service); setIsModalOpen(true); }}>
-                                  <Edit className="mr-2 h-4 w-4" /> Edit
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="focus:bg-red-50 text-red-600 cursor-pointer" onClick={() => handleDelete(service)}>
-                                  <Trash2 className="mr-2 h-4 w-4" /> Delete
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
-                          
-                          <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1">{service.title}</h3>
-                          <p className="text-sm text-slate-500 mb-5">{service.provider || 'No Provider'}</p>
-
-                          <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
-                            <div className="flex justify-between items-center text-sm">
-                              <div className="flex items-center gap-2">
-                                {getStatusIcon(daysLeft)}
-                                <span className={`font-semibold ${isDanger ? 'text-red-600' : 'text-slate-700'}`}>
-                                  {getStatusText(daysLeft)}
-                                </span>
+                      return (
+                        <tr key={service.id} className="hover:bg-slate-50/50 transition-colors group/row">
+                          <td className="px-8 py-5">
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg shrink-0">
+                                {service.title.charAt(0).toUpperCase()}
+                              </div>
+                              <div>
+                                <p className="font-bold text-slate-800 text-base">{service.title}</p>
+                                <p className="text-slate-500 text-xs mt-0.5">{service.provider || 'Unknown Provider'}</p>
                               </div>
                             </div>
-                            
-                            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
-                              <div 
-                                className={`h-full rounded-full transition-all duration-1000 ${colorClass}`}
-                                style={{ width: `${getProgressValue(daysLeft)}%` }}
-                              />
+                          </td>
+                          <td className="px-8 py-5">
+                            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold ${status.color} ${status.bg}`}>
+                              {status.icon}
+                              {status.text}
                             </div>
-                            
-                            <div className="flex justify-between items-center mt-1 text-xs text-slate-500 font-medium">
-                              <span>Exp: {format(service.expiryDate, "dd MMM yyyy")}</span>
+                          </td>
+                          <td className="px-8 py-5">
+                            <span className="text-slate-500 font-medium">{service.category}</span>
+                          </td>
+                          <td className="px-8 py-5">
+                            <p className="text-slate-800 font-semibold">{format(service.expiryDate, "dd MMM yyyy")}</p>
+                            {daysLeft > 60 && (
+                              <p className="text-slate-400 text-xs mt-0.5">in {daysLeft} days</p>
+                            )}
+                          </td>
+                          <td className="px-8 py-5 text-right">
+                            <div className="flex items-center justify-end gap-3">
+                              <button 
+                                onClick={() => handleRenew(service)}
+                                className="text-indigo-600 font-semibold hover:text-indigo-800 hover:underline px-3 py-1.5 transition-all"
+                              >
+                                Renew
+                              </button>
+                              
+                              <DropdownMenu>
+                                <DropdownMenuTrigger className="p-2 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors outline-none cursor-pointer opacity-0 group-hover/row:opacity-100">
+                                  <MoreHorizontal className="h-5 w-5" />
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-40 bg-white text-slate-800 border-slate-200 shadow-xl rounded-xl">
+                                  <DropdownMenuItem className="focus:bg-slate-50 cursor-pointer font-medium py-2.5" onClick={() => { setEditingService(service); setIsModalOpen(true); }}>
+                                    <Edit className="mr-2 h-4 w-4 text-slate-400" /> Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem className="focus:bg-red-50 text-red-600 cursor-pointer font-medium py-2.5" onClick={() => handleDelete(service)}>
+                                    <Trash2 className="mr-2 h-4 w-4 text-red-400" /> Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             </div>
-                          </div>
-                        </div>
-
-                        <div className="p-4 border-t border-slate-100 bg-slate-50">
-                          <button 
-                            onClick={() => handleRenew(service)}
-                            className={`w-full flex justify-center items-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                              isDanger 
-                                ? 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-200' 
-                                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 shadow-sm'
-                            }`}
-                          >
-                            Renew Service <ExternalLink className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <ServiceModal 
         isOpen={isModalOpen} 
@@ -253,6 +244,6 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
         companies={companies}
         onCompanyAdded={(c) => setCompanies([...companies, c])}
       />
-    </DashboardLayout>
+    </>
   );
 }
