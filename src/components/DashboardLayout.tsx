@@ -64,29 +64,29 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-theme">
-      <div className="flex w-full h-full bg-black/40 backdrop-blur-[2px]">
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      <div className="flex w-full h-full">
         {/* Sidebar */}
-        <aside className="w-72 glass-panel border-r-white/10 flex flex-col m-4 rounded-3xl z-10 overflow-hidden">
+        <aside className="w-72 bg-white border-r border-slate-200 flex flex-col z-10 overflow-hidden shadow-sm">
           <div className="p-6 flex items-center gap-3">
-            <div className="bg-gradient-to-tr from-blue-500 to-indigo-600 p-2 rounded-xl">
+            <div className="bg-blue-600 p-2 rounded-xl">
               <BarChart3 className="h-6 w-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">SubTracker</h1>
+              <h1 className="text-xl font-bold text-slate-900 tracking-tight">SubTracker</h1>
             </div>
           </div>
           
           <nav className="flex-1 px-4 space-y-2 mt-4">
-            <p className="px-3 text-xs font-semibold text-white/50 uppercase tracking-wider mb-2">Categories</p>
+            <p className="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Categories</p>
             {menuItems.map((item, idx) => (
               <a
                 key={idx}
                 href={item.label === "All Services" ? "/" : `/?category=${encodeURIComponent(item.mappedCategory)}`}
                 className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
                   item.active 
-                    ? "bg-gradient-to-r from-blue-500/20 to-indigo-500/20 text-blue-400 border border-blue-500/30 shadow-[inset_0_0_15px_rgba(59,130,246,0.2)]" 
-                    : "text-gray-300 hover:bg-white/5 hover:text-white"
+                    ? "bg-blue-50 text-blue-700 border border-blue-200 shadow-sm" 
+                    : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
                 }`}
               >
                 <item.icon className="h-5 w-5" />
@@ -96,21 +96,21 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
           </nav>
 
           <div className="p-4 mt-auto">
-            <div className="glass rounded-2xl p-4 flex flex-col gap-3">
+            <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex flex-col gap-3">
               <div className="flex items-center gap-3 text-sm">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-tr from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold shadow-lg">
+                <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center text-white font-bold shadow-md">
                     {user.email?.charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 truncate">
-                  <p className="text-sm font-medium text-white truncate">{user.email}</p>
-                  <p className="text-xs text-blue-300">Administrator</p>
+                  <p className="text-sm font-medium text-slate-900 truncate">{user.email}</p>
+                  <p className="text-xs text-slate-500">Administrator</p>
                 </div>
               </div>
               
               <div className="flex gap-2">
                 <Button 
                   variant="ghost" 
-                  className="flex-1 bg-white/5 hover:bg-white/10 text-white/80 hover:text-white justify-center rounded-xl transition-colors border border-white/5" 
+                  className="flex-1 bg-white hover:bg-slate-100 text-slate-700 hover:text-slate-900 justify-center rounded-xl transition-colors border border-slate-200 shadow-sm" 
                   onClick={() => router.push('/settings')}
                 >
                   <Settings className="h-4 w-4 mr-2" />
@@ -118,7 +118,7 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
                 </Button>
                 <Button 
                   variant="ghost" 
-                  className="flex-1 bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 justify-center rounded-xl transition-colors border border-white/5" 
+                  className="flex-1 bg-white hover:bg-red-50 text-red-600 hover:text-red-700 justify-center rounded-xl transition-colors border border-slate-200 shadow-sm" 
                   onClick={handleSignOut}
                 >
                   <LogOut className="h-4 w-4 mr-2" />
@@ -130,8 +130,8 @@ function DashboardLayoutContent({ children }: { children: React.ReactNode }) {
         </aside>
 
         {/* Main Content */}
-        <main className="flex-1 overflow-auto p-4 z-10 pl-0">
-          <div className="glass-panel w-full h-full rounded-3xl overflow-auto border-white/10">
+        <main className="flex-1 overflow-auto p-4 md:p-8 z-10 bg-slate-50">
+          <div className="w-full h-full rounded-3xl overflow-auto">
             {children}
           </div>
         </main>

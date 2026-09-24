@@ -40,37 +40,37 @@ export default function LoginPage() {
       <div className="flex w-full max-w-6xl h-[600px] rounded-3xl overflow-hidden glass-panel">
         
         {/* Left Side (Text/Branding) */}
-        <div className="hidden md:flex flex-col justify-center p-12 w-1/2 text-white">
+        <div className="hidden md:flex flex-col justify-center p-12 w-1/2 bg-blue-600 text-white">
           <div className="flex items-center gap-2 mb-8">
-            <BarChart3 className="h-8 w-8 text-blue-400" />
-            <h1 className="text-2xl font-bold">SubscriptionTracker</h1>
+            <BarChart3 className="h-8 w-8 text-blue-200" />
+            <h1 className="text-2xl font-bold">SubTracker</h1>
           </div>
           <h2 className="text-5xl font-bold leading-tight mb-4">
             All Your <br/>
-            <span className="text-blue-400">Subscriptions</span> <br/>
+            <span className="text-blue-200">Subscriptions</span> <br/>
             in One Place
           </h2>
-          <p className="text-gray-300 text-lg">
+          <p className="text-blue-100 text-lg">
             Domains • Hosting • SIM • Software<br/>
             Track it all. Stay in control.
           </p>
         </div>
 
         {/* Right Side (Login Form) */}
-        <div className="flex w-full md:w-1/2 items-center justify-center p-8 relative">
+        <div className="flex w-full md:w-1/2 items-center justify-center p-8 relative bg-slate-50">
           
-          <div className="w-full max-w-md glass rounded-3xl p-8 sm:p-10 relative z-10 text-white">
+          <div className="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 relative z-10 text-slate-900 border border-slate-200 shadow-md">
             <div className="flex flex-col items-center mb-8">
-              <BarChart3 className="h-10 w-10 text-blue-400 mb-2 md:hidden" />
+              <BarChart3 className="h-10 w-10 text-blue-600 mb-2 md:hidden" />
               <h2 className="text-3xl font-bold mb-2">Welcome back</h2>
-              <p className="text-white/60 text-center">Sign in to continue managing your subscriptions</p>
+              <p className="text-slate-500 text-center">Sign in to continue managing your subscriptions</p>
             </div>
             
             <form onSubmit={handleLogin} className="space-y-5">
-              {error && <div className="text-sm font-medium text-red-300 bg-red-900/30 p-3 rounded-lg border border-red-500/30 text-center">{error}</div>}
+              {error && <div className="text-sm font-medium text-red-600 bg-red-50 p-3 rounded-lg border border-red-200 text-center">{error}</div>}
               
               <div className="space-y-1.5 relative">
-                <div className="absolute left-3 top-3 text-white/50">
+                <div className="absolute left-3 top-3 text-slate-400">
                   <Mail className="h-5 w-5" />
                 </div>
                 <Input 
@@ -78,14 +78,14 @@ export default function LoginPage() {
                   type="email" 
                   placeholder="Email address" 
                   required 
-                  className="glass-input pl-10 h-12 rounded-xl border-white/20"
+                  className="pl-10 h-12 rounded-xl border-slate-300 bg-slate-50 text-slate-900 focus:bg-white"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               
               <div className="space-y-1.5 relative">
-                <div className="absolute left-3 top-3 text-white/50">
+                <div className="absolute left-3 top-3 text-slate-400">
                   <Lock className="h-5 w-5" />
                 </div>
                 <Input 
@@ -93,20 +93,20 @@ export default function LoginPage() {
                   type={showPassword ? "text" : "password"} 
                   placeholder="Password"
                   required 
-                  className="glass-input pl-10 pr-10 h-12 rounded-xl border-white/20"
+                  className="pl-10 pr-10 h-12 rounded-xl border-slate-300 bg-slate-50 text-slate-900 focus:bg-white"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
                 <button 
                   type="button"
-                  className="absolute right-3 top-3 text-white/50 hover:text-white"
+                  className="absolute right-3 top-3 text-slate-400 hover:text-slate-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
 
-              <Button type="submit" className="w-full h-12 rounded-xl glass-button text-base mt-4" disabled={loading}>
+              <Button type="submit" className="w-full h-12 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium shadow-sm text-base mt-4" disabled={loading}>
                 {loading ? "Signing in..." : "Sign in →"}
               </Button>
             </form>

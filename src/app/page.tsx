@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DashboardLayout } from "@/components/DashboardLayout";
-import { Plus, ExternalLink, MoreVertical, ShieldAlert, CheckCircle2, Clock, Edit, Trash2 } from "lucide-react";
+import { Plus, ExternalLink, MoreVertical, ShieldAlert, CheckCircle2, Clock, Edit, Trash2, Building2 } from "lucide-react";
 import { differenceInDays, format } from "date-fns";
 import Swal from 'sweetalert2';
 import { getSubscriptions, getCompanies, deleteSubscription, addSubscription, updateSubscription, Subscription, Company } from "@/lib/db";
@@ -44,15 +44,15 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
   };
 
   const getStatusColor = (days: number) => {
-    if (days <= 30) return "bg-gradient-to-r from-red-500 to-rose-600 shadow-red-500/50";
-    if (days <= 60) return "bg-gradient-to-r from-amber-400 to-orange-500 shadow-orange-500/50";
-    return "bg-gradient-to-r from-emerald-400 to-teal-500 shadow-emerald-500/50";
+    if (days <= 30) return "bg-red-500 shadow-red-500/20";
+    if (days <= 60) return "bg-amber-500 shadow-amber-500/20";
+    return "bg-emerald-500 shadow-emerald-500/20";
   };
 
   const getStatusIcon = (days: number) => {
-    if (days <= 30) return <ShieldAlert className="h-5 w-5 text-red-400" />;
-    if (days <= 60) return <Clock className="h-5 w-5 text-amber-400" />;
-    return <CheckCircle2 className="h-5 w-5 text-emerald-400" />;
+    if (days <= 30) return <ShieldAlert className="h-5 w-5 text-red-500" />;
+    if (days <= 60) return <Clock className="h-5 w-5 text-amber-500" />;
+    return <CheckCircle2 className="h-5 w-5 text-emerald-500" />;
   }
 
   const getStatusText = (days: number) => {
@@ -72,28 +72,11 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
         title: 'No Renewal Link',
         text: 'You have not set a renewal link for this service. Please edit the service to add one.',
         icon: 'warning',
-        background: 'rgba(15, 23, 42, 0.95)',
-        color: '#fff',
+        confirmButtonColor: '#2563eb',
       });
       return;
     }
-
-    Swal.fire({
-      title: 'Renew Service?',
-      text: `You will be redirected to renew ${service.title}.`,
-      icon: 'info',
-      showCancelButton: true,
-      confirmButtonColor: '#3b82f6',
-      cancelButtonColor: '#475569',
-      confirmButtonText: 'Proceed to Payment',
-      background: 'rgba(15, 23, 42, 0.95)',
-      color: '#fff',
-      backdrop: 'rgba(0,0,0,0.6)'
-    }).then((result) => {
-      if (result.isConfirmed) {
-        window.open(service.renewUrl, '_blank');
-      }
-    });
+    window.open(service.renewUrl, '_blank');
   };
 
   const handleDelete = (service: Subscription) => {
@@ -103,11 +86,8 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#475569',
-      confirmButtonText: 'Yes, delete it!',
-      background: 'rgba(15, 23, 42, 0.95)',
-      color: '#fff',
-      backdrop: 'rgba(0,0,0,0.6)'
+      cancelButtonColor: '#64748b',
+      confirmButtonText: 'Yes, delete it!'
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
@@ -117,9 +97,7 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
             icon: 'success',
             title: 'Deleted!',
             showConfirmButton: false,
-            timer: 1500,
-            background: 'rgba(15, 23, 42, 0.95)',
-            color: '#fff',
+            timer: 1500
           });
         } catch (error: any) {
           Swal.fire('Error', error.message, 'error');
@@ -134,20 +112,34 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
     } else {
       await addSubscription(serviceData);
     }
-    await fetchData(); // Refresh list
+    await fetchData();
   };
+
+  // Group services by company
+  const groupedServices = companies.map(company => ({
+    company,
+    services: filteredServices.filter(s => s.companyId === company.id)
+  })).filter(group => group.services.length > 0);
+
+  const unknownCompanyServices = filteredServices.filter(s => !companies.find(c => c.id === s.companyId));
+  if (unknownCompanyServices.length > 0) {
+    groupedServices.push({
+      company: { id: "unknown", name: "Other Services" },
+      services: unknownCompanyServices
+    });
+  }
 
   return (
     <DashboardLayout>
-      <div className="p-8 md:p-12">
-        <div className="flex flex-col md:flex-row md:items-center justify-between mb-10 gap-4">
+      <div className="p-2 md:p-6 max-w-7xl mx-auto">
+        <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Overview</h1>
-            <p className="text-blue-200">Track and manage your upcoming expirations.</p>
+            <h1 className="text-3xl font-bold text-slate-900 tracking-tight mb-1">Overview</h1>
+            <p className="text-slate-500">Track and manage your upcoming expirations.</p>
           </div>
           <button 
             onClick={() => { setEditingService(null); setIsModalOpen(true); }}
-            className="flex items-center gap-2 glass-button px-6 py-3 rounded-xl font-medium transition-transform hover:scale-105 active:scale-95"
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md rounded-xl px-5 py-2.5 font-medium transition-transform hover:scale-105 active:scale-95"
           >
             <Plus className="h-5 w-5" /> Add Service
           </button>
@@ -155,95 +147,100 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
-             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+             <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
           </div>
         ) : filteredServices.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center glass rounded-3xl border-white/10">
-             <Clock className="h-16 w-16 text-white/20 mb-4" />
-             <h3 className="text-2xl font-semibold text-white mb-2">No Services Yet</h3>
-             <p className="text-blue-200 mb-6">Click the button above to add your first subscription.</p>
+          <div className="flex flex-col items-center justify-center py-20 text-center bg-white rounded-3xl border border-slate-200 shadow-sm">
+             <Clock className="h-16 w-16 text-slate-300 mb-4" />
+             <h3 className="text-2xl font-semibold text-slate-900 mb-2">No Services Found</h3>
+             <p className="text-slate-500 mb-6">Click the button above to add a new subscription.</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredServices.map((service) => {
-              const daysLeft = differenceInDays(service.expiryDate, new Date());
-              const colorClass = getStatusColor(daysLeft);
-              const isDanger = daysLeft <= 30;
-
-              return (
-                <div 
-                  key={service.id} 
-                  className={`flex flex-col glass rounded-3xl overflow-hidden relative transition-all duration-300 hover:translate-y-[-5px] hover:shadow-[0_15px_40px_0_rgba(0,0,0,0.4)] ${isDanger ? 'border-red-500/30' : 'border-white/10'}`}
-                >
-                  {isDanger && <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/20 blur-[50px] rounded-full pointer-events-none"></div>}
-                  
-                  <div className="p-6 flex-1 z-10 relative">
-                    <div className="flex justify-between items-start mb-4">
-                      <span className="px-3 py-1 bg-white/10 rounded-full text-xs font-medium text-white border border-white/10 backdrop-blur-md">
-                        {service.category}
-                      </span>
-                      
-                      <DropdownMenu>
-                        <DropdownMenuTrigger className="text-white/50 hover:text-white transition-colors outline-none cursor-pointer">
-                          <MoreVertical className="h-5 w-5" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-40 bg-slate-800 text-white border-white/10">
-                          <DropdownMenuItem className="focus:bg-white/10 cursor-pointer" onClick={() => { setEditingService(service); setIsModalOpen(true); }}>
-                            <Edit className="mr-2 h-4 w-4" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem className="focus:bg-red-500/20 text-red-400 cursor-pointer" onClick={() => handleDelete(service)}>
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-
-                    </div>
-                    
-                    <h3 className="text-xl font-bold text-white mb-1 line-clamp-1">{service.title}</h3>
-                    <p className="text-sm text-blue-200/70 mb-6">{service.provider || 'No Provider'}</p>
-
-                    <div className="space-y-4 bg-black/20 p-4 rounded-2xl border border-white/5">
-                      <div className="flex justify-between items-center text-sm mb-2">
-                        <div className="flex items-center gap-2">
-                          {getStatusIcon(daysLeft)}
-                          <span className={`font-semibold ${isDanger ? 'text-red-400' : 'text-white'}`}>
-                            {getStatusText(daysLeft)}
-                          </span>
-                        </div>
-                      </div>
-                      
-                      <div className="h-2.5 w-full bg-black/40 rounded-full overflow-hidden border border-white/5 shadow-inner">
-                        <div 
-                          className={`h-full rounded-full transition-all duration-1000 shadow-lg ${colorClass}`}
-                          style={{ width: `${getProgressValue(daysLeft)}%` }}
-                        />
-                      </div>
-                      
-                      <div className="flex justify-between items-center mt-2 text-xs text-white/60">
-                        <span>{format(service.expiryDate, "dd MMM yyyy")}</span>
-                        <div className="flex items-center gap-1.5 px-2 py-1 bg-white/5 rounded-md border border-white/5">
-                           <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
-                           <span className="truncate max-w-[80px]">{getCompanyName(service.companyId)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-4 border-t border-white/10 bg-black/20 z-10">
-                    <button 
-                      onClick={() => handleRenew(service)}
-                      className={`w-full flex justify-center items-center gap-2 py-3 rounded-xl text-sm font-medium transition-all ${
-                        isDanger 
-                          ? 'bg-red-500/20 text-red-300 hover:bg-red-500/40 border border-red-500/30' 
-                          : 'bg-white/5 text-white hover:bg-white/10 border border-white/10'
-                      }`}
-                    >
-                      Renew Service <ExternalLink className="h-4 w-4" />
-                    </button>
-                  </div>
+          <div className="space-y-10">
+            {groupedServices.map(group => (
+              <div key={group.company.id} className="space-y-4">
+                <div className="flex items-center gap-2 border-b border-slate-200 pb-2">
+                  <Building2 className="h-5 w-5 text-blue-600" />
+                  <h2 className="text-xl font-bold text-slate-800">{group.company.name}</h2>
+                  <span className="bg-slate-100 text-slate-600 text-xs font-semibold px-2 py-0.5 rounded-full">{group.services.length}</span>
                 </div>
-              )
-            })}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                  {group.services.map((service) => {
+                    const daysLeft = differenceInDays(service.expiryDate, new Date());
+                    const colorClass = getStatusColor(daysLeft);
+                    const isDanger = daysLeft <= 30;
+
+                    return (
+                      <div 
+                        key={service.id} 
+                        className={`flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm border transition-all hover:shadow-md ${isDanger ? 'border-red-200 ring-1 ring-red-100' : 'border-slate-200'}`}
+                      >
+                        <div className="p-5 flex-1">
+                          <div className="flex justify-between items-start mb-4">
+                            <span className="px-3 py-1 bg-slate-100 rounded-full text-xs font-semibold text-slate-600 border border-slate-200">
+                              {service.category}
+                            </span>
+                            
+                            <DropdownMenu>
+                              <DropdownMenuTrigger className="text-slate-400 hover:text-slate-600 transition-colors outline-none cursor-pointer">
+                                <MoreVertical className="h-5 w-5" />
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-40 bg-white text-slate-800 border-slate-200">
+                                <DropdownMenuItem className="focus:bg-slate-100 cursor-pointer" onClick={() => { setEditingService(service); setIsModalOpen(true); }}>
+                                  <Edit className="mr-2 h-4 w-4" /> Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="focus:bg-red-50 text-red-600 cursor-pointer" onClick={() => handleDelete(service)}>
+                                  <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                          
+                          <h3 className="text-lg font-bold text-slate-900 mb-1 line-clamp-1">{service.title}</h3>
+                          <p className="text-sm text-slate-500 mb-5">{service.provider || 'No Provider'}</p>
+
+                          <div className="space-y-3 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                            <div className="flex justify-between items-center text-sm">
+                              <div className="flex items-center gap-2">
+                                {getStatusIcon(daysLeft)}
+                                <span className={`font-semibold ${isDanger ? 'text-red-600' : 'text-slate-700'}`}>
+                                  {getStatusText(daysLeft)}
+                                </span>
+                              </div>
+                            </div>
+                            
+                            <div className="h-2 w-full bg-slate-200 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-1000 ${colorClass}`}
+                                style={{ width: `${getProgressValue(daysLeft)}%` }}
+                              />
+                            </div>
+                            
+                            <div className="flex justify-between items-center mt-1 text-xs text-slate-500 font-medium">
+                              <span>Exp: {format(service.expiryDate, "dd MMM yyyy")}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="p-4 border-t border-slate-100 bg-slate-50">
+                          <button 
+                            onClick={() => handleRenew(service)}
+                            className={`w-full flex justify-center items-center gap-2 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                              isDanger 
+                                ? 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-200' 
+                                : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-300 shadow-sm'
+                            }`}
+                          >
+                            Renew Service <ExternalLink className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

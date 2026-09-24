@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 0 0% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 221.2 83.2% 53.3%;
     --primary-foreground: 210 40% 98%;
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -22,55 +22,8 @@
     --destructive-foreground: 210 40% 98%;
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-  }
-}
-
-@layer utilities {
-  .bg-theme {
-    background-image: url('/background_mo.png');
-    background-size: cover;
-    background-position: center;
-  }
-  @media (min-width: 768px) {
-    .bg-theme {
-      background-image: url('/background_pc.png');
-    }
-  }
-  .glass {
-    @apply bg-black/40 backdrop-blur-md border border-white/20 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)];
-  }
-  .glass-panel {
-    @apply bg-black/60 backdrop-blur-xl border border-white/10 shadow-2xl;
-  }
-  .glass-input {
-    @apply bg-white/5 border-white/10 text-white placeholder:text-white/50 focus-visible:ring-white/30;
-  }
-  .glass-button {
-    @apply bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white shadow-lg shadow-blue-500/25 border-0;
+    --ring: 221.2 83.2% 53.3%;
+    --radius: 0.75rem;
   }
 }
 
@@ -79,6 +32,24 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-50 text-slate-900;
+  }
+}
+
+@layer utilities {
+  .bg-theme {
+    @apply bg-slate-50;
+  }
+  .glass-panel {
+    @apply bg-white border border-slate-200 shadow-sm;
+  }
+  .glass {
+    @apply bg-white border border-slate-200 shadow-sm;
+  }
+  .glass-input {
+    @apply bg-white border border-slate-300 text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all;
+  }
+  .glass-button {
+    @apply bg-blue-600 text-white font-medium shadow-md shadow-blue-500/20 hover:bg-blue-700 hover:shadow-blue-500/40 transition-all border border-transparent;
   }
 }

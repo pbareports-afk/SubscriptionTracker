@@ -51,36 +51,36 @@ export default function SettingsPage() {
     <DashboardLayout>
       <div className="p-8 md:p-12">
         <div className="mb-10">
-          <h1 className="text-4xl font-bold text-white tracking-tight mb-2">Settings</h1>
-          <p className="text-blue-200">Manage your account and security.</p>
+          <h1 className="text-4xl font-bold text-slate-900 tracking-tight mb-2">Settings</h1>
+          <p className="text-slate-500">Manage your account and security.</p>
         </div>
 
         <div className="max-w-xl">
-          <div className="glass rounded-3xl p-8 border-white/10 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-10">
-              <ShieldCheck className="w-40 h-40" />
+          <div className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm relative overflow-hidden">
+            <div className="absolute top-0 right-0 p-8 opacity-5">
+              <ShieldCheck className="w-40 h-40 text-blue-600" />
             </div>
             
-            <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3 relative z-10">
-              <KeyRound className="h-6 w-6 text-blue-400" />
+            <h2 className="text-2xl font-bold text-slate-900 mb-6 flex items-center gap-3 relative z-10">
+              <KeyRound className="h-6 w-6 text-blue-600" />
               Change Password
             </h2>
             
             <form onSubmit={handleUpdatePassword} className="space-y-6 relative z-10">
               <div className="space-y-2">
-                <Label className="text-white/80">Account Email</Label>
-                <div className="glass-input h-12 rounded-xl border-white/20 px-4 flex items-center text-white/50 bg-white/5">
+                <Label className="text-slate-700">Account Email</Label>
+                <div className="h-12 rounded-xl border border-slate-200 px-4 flex items-center text-slate-500 bg-slate-50">
                   {user?.email}
                 </div>
-                <p className="text-xs text-blue-300/60 ml-1">You cannot change your email address.</p>
+                <p className="text-xs text-slate-400 ml-1">You cannot change your email address.</p>
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="new-pass" className="text-white/80">New Password</Label>
+                <Label htmlFor="new-pass" className="text-slate-700">New Password</Label>
                 <Input 
                   id="new-pass" 
                   type="password"
-                  className="glass-input h-12 rounded-xl border-white/20"
+                  className="bg-white h-12 rounded-xl border-slate-300"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   placeholder="••••••••"
@@ -89,11 +89,11 @@ export default function SettingsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="confirm-pass" className="text-white/80">Confirm New Password</Label>
+                <Label htmlFor="confirm-pass" className="text-slate-700">Confirm New Password</Label>
                 <Input 
                   id="confirm-pass" 
                   type="password"
-                  className="glass-input h-12 rounded-xl border-white/20"
+                  className="bg-white h-12 rounded-xl border-slate-300"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
@@ -101,7 +101,7 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <Button type="submit" className="glass-button w-full h-12 rounded-xl mt-4" disabled={loading}>
+              <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white w-full h-12 rounded-xl mt-4 shadow-sm" disabled={loading}>
                 {loading ? "Updating..." : "Update Password"}
               </Button>
             </form>

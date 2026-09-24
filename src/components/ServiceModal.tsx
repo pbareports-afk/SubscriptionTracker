@@ -58,8 +58,6 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
         icon: 'error',
         title: 'Missing Fields',
         text: 'Please fill in all required fields.',
-        background: 'rgba(15, 23, 42, 0.95)',
-        color: '#fff',
       });
       return;
     }
@@ -73,16 +71,12 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
         title: editingService ? 'Service Updated' : 'Service Added',
         showConfirmButton: false,
         timer: 1500,
-        background: 'rgba(15, 23, 42, 0.95)',
-        color: '#fff',
       });
     } catch (error: any) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
         text: error.message,
-        background: 'rgba(15, 23, 42, 0.95)',
-        color: '#fff',
       });
     } finally {
       setIsSubmitting(false);
@@ -105,7 +99,7 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass-panel text-white border-white/20 sm:max-w-[500px]">
+      <DialogContent className="bg-white text-slate-900 border-slate-200 sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">
             {editingService ? "Edit Service" : "Add New Service"}
@@ -115,38 +109,38 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
         <form onSubmit={handleSubmit} className="space-y-4 py-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="title" className="text-white/80">Service Name *</Label>
+              <Label htmlFor="title" className="text-slate-700">Service Name *</Label>
               <Input 
                 id="title" 
                 value={formData.title}
                 onChange={e => setFormData({...formData, title: e.target.value})}
-                className="glass-input" 
+                className="bg-white border-slate-300" 
                 placeholder="e.g. Main Company Website" 
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="provider" className="text-white/80">Provider / Vendor</Label>
+              <Label htmlFor="provider" className="text-slate-700">Provider / Vendor</Label>
               <Input 
                 id="provider" 
                 value={formData.provider}
                 onChange={e => setFormData({...formData, provider: e.target.value})}
-                className="glass-input" 
+                className="bg-white border-slate-300" 
                 placeholder="e.g. GoDaddy" 
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="category" className="text-white/80">Category *</Label>
+              <Label htmlFor="category" className="text-slate-700">Category *</Label>
               <Select 
                 value={formData.category} 
                 onValueChange={(v) => setFormData({...formData, category: v || ''})}
               >
-                <SelectTrigger className="glass-input">
+                <SelectTrigger className="bg-white border-slate-300">
                   <SelectValue placeholder="Select category" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 text-white border-white/10">
+                <SelectContent className="bg-white text-slate-900 border-slate-200">
                   {CATEGORIES.map(cat => (
                     <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                   ))}
@@ -155,18 +149,18 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label className="text-white/80">Company / Subsidiary *</Label>
+              <Label className="text-slate-700">Company / Subsidiary *</Label>
               {isAddingCompany ? (
                 <div className="flex gap-2">
                   <Input 
                     value={newCompanyName}
                     onChange={e => setNewCompanyName(e.target.value)}
-                    className="glass-input" 
+                    className="bg-white border-slate-300" 
                     placeholder="New company name" 
                     autoFocus
                   />
-                  <Button type="button" onClick={handleAddCompany} className="bg-blue-600 hover:bg-blue-700">Add</Button>
-                  <Button type="button" variant="ghost" onClick={() => setIsAddingCompany(false)} className="text-white/70 hover:text-white">Cancel</Button>
+                  <Button type="button" onClick={handleAddCompany} className="bg-blue-600 hover:bg-blue-700 text-white">Add</Button>
+                  <Button type="button" variant="ghost" onClick={() => setIsAddingCompany(false)} className="text-slate-500 hover:text-slate-900 hover:bg-slate-100">Cancel</Button>
                 </div>
               ) : (
                 <div className="flex gap-2">
@@ -175,18 +169,18 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
                     value={formData.companyId} 
                     onValueChange={(v) => setFormData({...formData, companyId: v || ''})}
                   >
-                    <SelectTrigger className="glass-input flex-1">
+                    <SelectTrigger className="bg-white border-slate-300 flex-1">
                       <SelectValue placeholder="Select company">
                         {companies.find(c => c.id === formData.companyId)?.name || "Select company"}
                       </SelectValue>
                     </SelectTrigger>
-                    <SelectContent className="bg-slate-800 text-white border-white/10">
+                    <SelectContent className="bg-white text-slate-900 border-slate-200">
                       {companies.map(c => (
                         <SelectItem key={c.id} value={c.id!}>{c.name}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button type="button" variant="outline" className="border-white/20 text-white bg-white/5 hover:bg-white/10" onClick={() => setIsAddingCompany(true)}>
+                  <Button type="button" variant="outline" className="border-slate-300 text-slate-700 bg-white hover:bg-slate-100" onClick={() => setIsAddingCompany(true)}>
                     + New
                   </Button>
                 </div>
@@ -194,35 +188,35 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="expiryDate" className="text-white/80">Expiry Date *</Label>
+              <Label htmlFor="expiryDate" className="text-slate-700">Expiry Date *</Label>
               <Input 
                 id="expiryDate" 
                 type="date"
                 value={formData.expiryDate ? new Date(formData.expiryDate).toISOString().split('T')[0] : ''}
                 onChange={e => setFormData({...formData, expiryDate: new Date(e.target.value)})}
-                className="glass-input [color-scheme:dark]" 
+                className="bg-white border-slate-300" 
                 required
               />
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="renewUrl" className="text-white/80">Renewal Link (URL)</Label>
+              <Label htmlFor="renewUrl" className="text-slate-700">Renewal Link (URL)</Label>
               <Input 
                 id="renewUrl" 
                 type="url"
                 value={formData.renewUrl}
                 onChange={e => setFormData({...formData, renewUrl: e.target.value})}
-                className="glass-input" 
+                className="bg-white border-slate-300" 
                 placeholder="https://" 
               />
             </div>
           </div>
 
           <DialogFooter className="mt-6">
-            <Button type="button" variant="ghost" className="text-white/70 hover:text-white hover:bg-white/10" onClick={onClose}>
+            <Button type="button" variant="ghost" className="text-slate-500 hover:text-slate-900 hover:bg-slate-100" onClick={onClose}>
               Cancel
             </Button>
-            <Button type="submit" className="glass-button" disabled={isSubmitting}>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-sm" disabled={isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Service"}
             </Button>
           </DialogFooter>
