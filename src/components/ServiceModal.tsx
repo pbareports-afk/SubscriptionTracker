@@ -26,6 +26,7 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
     provider: "",
     category: "",
     companyId: "",
+    renewMethod: "URL",
     renewUrl: "",
     expiryDate: new Date(),
   });
@@ -45,6 +46,7 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
         provider: "",
         category: "",
         companyId: "",
+        renewMethod: "URL",
         renewUrl: "",
         expiryDate: new Date(),
       });
@@ -200,16 +202,36 @@ export function ServiceModal({ isOpen, onClose, onSave, editingService, companie
             </div>
 
             <div className="space-y-2 col-span-2">
-              <Label htmlFor="renewUrl" className="text-slate-700">Renewal Link (URL)</Label>
-              <Input 
-                id="renewUrl" 
-                type="url"
-                value={formData.renewUrl}
-                onChange={e => setFormData({...formData, renewUrl: e.target.value})}
-                className="bg-white border-slate-300" 
-                placeholder="https://" 
-              />
+              <Label htmlFor="renewMethod" className="text-slate-700">Renewal Method</Label>
+              <Select 
+                value={formData.renewMethod || 'URL'} 
+                onValueChange={(v: any) => setFormData({...formData, renewMethod: v})}
+              >
+                <SelectTrigger className="bg-white border-slate-300">
+                  <SelectValue placeholder="Select method" />
+                </SelectTrigger>
+                <SelectContent className="bg-white text-slate-900 border-slate-200">
+                  <SelectItem value="URL">Go to Provider URL</SelectItem>
+                  <SelectItem value="Email">Provider sends Email</SelectItem>
+                  <SelectItem value="LINE">Provider sends LINE / Chat</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+
+            {(!formData.renewMethod || formData.renewMethod === 'URL') && (
+              <div className="space-y-2 col-span-2">
+                <Label htmlFor="renewUrl" className="text-slate-700">Renewal Link (URL)</Label>
+                <Input 
+                  id="renewUrl" 
+                  type="url"
+                  value={formData.renewUrl}
+                  onChange={e => setFormData({...formData, renewUrl: e.target.value})}
+                  className="bg-white border-slate-300" 
+                  placeholder="https://" 
+                />
+              </div>
+            )}
           </div>
 
           <DialogFooter className="mt-6">

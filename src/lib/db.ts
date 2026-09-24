@@ -8,6 +8,7 @@ export interface Subscription {
   companyId: string;
   category: string;
   expiryDate: Date;
+  renewMethod?: 'URL' | 'Email' | 'LINE' | 'Other';
   renewUrl: string;
   cost?: number;
   notes?: string;

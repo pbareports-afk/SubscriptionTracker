@@ -314,12 +314,20 @@ export default function Home({ searchParams }: { searchParams: { category?: stri
 
                         <td className="px-6 py-4 text-right">
                           <div className="flex items-center justify-end gap-2">
-                            <button 
-                              onClick={() => handleRenew(service)}
-                              className="text-blue-600 font-bold text-sm hover:text-blue-700 transition-colors mr-2"
-                            >
-                              Renew &gt;
-                            </button>
+                            {(!service.renewMethod || service.renewMethod === 'URL') ? (
+                              <button 
+                                onClick={() => handleRenew(service)}
+                                className="text-blue-600 font-bold text-sm hover:text-blue-700 transition-colors mr-2"
+                              >
+                                Renew &gt;
+                              </button>
+                            ) : service.renewMethod === 'Email' ? (
+                              <span className="text-slate-500 font-semibold text-[11px] uppercase tracking-wider mr-2 bg-slate-100 px-2 py-1 rounded-md">Via Email</span>
+                            ) : service.renewMethod === 'LINE' ? (
+                              <span className="text-[#00B900] font-semibold text-[11px] uppercase tracking-wider mr-2 bg-[#00B900]/10 px-2 py-1 rounded-md">Via LINE</span>
+                            ) : (
+                              <span className="text-slate-500 font-semibold text-[11px] uppercase tracking-wider mr-2 bg-slate-100 px-2 py-1 rounded-md">{service.renewMethod}</span>
+                            )}
                             
                             <DropdownMenu>
                               <DropdownMenuTrigger className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors outline-none cursor-pointer">
